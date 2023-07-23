@@ -7,9 +7,38 @@ use App\Repository\GroupeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: GroupeRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['groupe:list']
+            ]
+        ],
+        'post' => [
+            'denormalization_context' => [
+                'groups' => ['groupe:post']
+            ]
+        ],
+    ],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['groupe:item']
+            ]
+        ],
+        'put' => [
+            'denormalization_context' => [
+                'groups' => ['groupe:put']
+            ]
+        ],
+        'delete' => [
+            'access_control' => 'is_granted(\'DELETE\', object)',
+        ],
+    ],
+)]
 class Groupe
 {
     #[ORM\Id]
@@ -18,6 +47,7 @@ class Groupe
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['groupe:list','groupe:post','groupe:item','groupe:put', 'nft:list', 'nft:item','nft:put' ])]
     private ?string $libelle = null;
 
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: Nft::class)]

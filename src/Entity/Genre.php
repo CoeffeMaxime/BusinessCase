@@ -2,12 +2,30 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GenreRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: GenreRepository::class)]
+#[ApiResource(
+    collectionOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['genre:list']
+            ]
+        ],
+    ],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['genre:item']
+            ]
+        ],
+    ],
+)]
 class Genre
 {
     #[ORM\Id]
@@ -16,6 +34,7 @@ class Genre
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:post', 'user:item','user:put','genre:item', 'genre:list'])]
     private ?string $genre = null;
 
     #[ORM\OneToMany(mappedBy: 'genre', targetEntity: User::class)]

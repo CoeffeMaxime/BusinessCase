@@ -10,9 +10,34 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+
+        'post' => [
+            'denormalization_context' => [
+                'groups' => ['user:post']
+            ]
+        ],
+    ],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['user:item']
+            ]
+        ],
+        'put' => [
+            'denormalization_context' => [
+                'groups' => ['user:put']
+            ]
+        ],
+        'delete' => [
+            'access_control' => 'is_granted(\'DELETE\', object)',
+        ],
+    ],
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -21,40 +46,51 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?string $email = null;
 
     #[ORM\Column]
+
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?string $prenom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?\DateTimeInterface $dateNaissance = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?string $Pseudo = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Visite::class)]
+    #[Groups('user:item')]
     private Collection $visites;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: acquisition::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Acquisition::class)]
+    #[Groups(['user:item','user:put'])]
     private Collection $acquisitions;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?Genre $genre = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
+    #[Groups(['user:post', 'user:item','user:put'])]
     private ?Adresse $adresse = null;
 
     public function __construct()
@@ -238,7 +274,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->acquisitions;
     }
 
-    public function addAcquisition(acquisition $acquisition): static
+    public function addAcquisition(Acquisition $acquisition): static
     {
         if (!$this->acquisitions->contains($acquisition)) {
             $this->acquisitions->add($acquisition);
@@ -248,7 +284,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeAcquisition(acquisition $acquisition): static
+    public function removeAcquisition(Acquisition $acquisition): static
     {
         if ($this->acquisitions->removeElement($acquisition)) {
             // set the owning side to null (unless already changed)
@@ -260,24 +296,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getGenre(): ?genre
+    public function getGenre(): ?Genre
     {
         return $this->genre;
     }
 
-    public function setGenre(?genre $genre): static
+    public function setGenre(?Genre $genre): static
     {
         $this->genre = $genre;
 
         return $this;
     }
 
-    public function getAdresse(): ?adresse
+    public function getAdresse(): ?Adresse
     {
         return $this->adresse;
     }
 
-    public function setAdresse(?adresse $adresse): static
+    public function setAdresse(?Adresse $adresse): static
     {
         $this->adresse = $adresse;
 

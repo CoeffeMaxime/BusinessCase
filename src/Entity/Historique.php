@@ -6,20 +6,44 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\HistoriqueRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: HistoriqueRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['historique:list']
+            ]
+        ],
+        'post' => [
+            'denormalization_context' => [
+                'groups' => ['historique:post']
+            ]
+        ],
+    ],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['historique:item']
+            ]
+        ],
+    ],
+)]
 class Historique
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['historique:list','historique:post','historique:item','nft:list','nft:item'])]
     private ?\DateTimeInterface $dateJour = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Groups(['historique:list','historique:post','historique:item','nft:list','nft:item'])]
     private ?string $valeur = null;
 
     #[ORM\ManyToOne(inversedBy: 'historiques')]

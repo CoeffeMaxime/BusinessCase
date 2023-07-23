@@ -1,0 +1,97 @@
+App\Entity\Genre:
+    genre_1:
+        genre: 'Masculin'
+    genre_2:
+        genre: 'Feminin'
+
+App\Entity\Categorie:
+    categorie_1:
+        libelle: 'Art'
+        designation: '<paragraph(2)>'
+
+    categorie_2:
+        libelle: 'Gaming'
+        designation: '<paragraph(2)>'
+
+    categorie_3:
+        libelle: 'Member'
+        designation: '<paragraph(2)>'
+
+    categorie_4:
+        libelle: 'PfP'
+        designation: '<paragraph(2)>'
+
+    categorie_5:
+        libelle: 'Photo'
+        designation: '<paragraph(2)>'
+
+    categorie_6:
+        libelle: 'Music'
+        designation: '<paragraph(2)>'
+
+
+App\Entity\Groupe:
+    groupe{1..200}:
+        libelle: <company()>
+        nfts: ['@nft_<numberBetween(1, 100)>']
+
+
+
+App\Entity\Historique:
+    historique{1..200}:
+        dateJour: <dateTimeBetween('2015-01-01', NOW)>
+        valeur: <randomFloat(2,20,30)>
+        nft: '@nft_<numberBetween(1, 100)>'
+
+
+App\Entity\Adresse:
+    adresse_{0..100}:
+        ligne1: <address()>
+        codePostal: <postcode()>
+        ville: <country()>
+
+App\Entity\Visite:
+    visite_{0..100}:
+        dateVisite: <dateTimeBetween('2015-01-01', NOW)>
+        user: '@user_<numberBetween(1, 15)>'
+    visite_{101..200}:
+        dateVisite: <dateTimeBetween('2015-01-01', NOW)>
+        user: '@user_<numberBetween(16, 30)>'
+
+
+App\Entity\Acquisition:
+    acquisition_{0..200}:
+        estVendu: '0'
+        dateAchat: <dateTimeBetween('2015-01-01', NOW)>
+        nft: '@nft_<numberBetween(1, 100)>'
+        user: '@user_<numberBetween(1, 30)>'
+
+
+App\Entity\User:
+    user_{1..15}:
+        nom (unique): <lastName()>
+        prenom: <firstName()>
+        email (unique): <email()>
+        pseudo: <userName()>
+        dateNaissance: <dateTimeBetween('2015-01-01', NOW)>
+        password: "\\$2y\\$13\\$IxLbNOJZ2MbYHehPhynFwOun0bQ9lGy6PqXzsv/yJ0RZGW2gElBW6"
+        adresse: '@adresse_<numberBetween(1, 100)>'
+        genre: '@genre_1'
+    user_{16..30}:
+        nom (unique): <lastName()>
+        prenom: <firstName()>
+        email (unique): <email()>
+        Pseudo: <userName()>
+        dateNaissance: <dateTimeBetween('2015-01-01', NOW)>
+        password: "\\$2y\\$13\\$IxLbNOJZ2MbYHehPhynFwOun0bQ9lGy6PqXzsv/yJ0RZGW2gElBW6"
+        adresse: '@adresse_<numberBetween(1, 100)>'
+        genre: '@genre_2'
+
+App\Entity\Nft:
+    nft_{1..1000}:
+        nom : <lastName()>
+        dateCreation: <dateTimeBetween('2015-01-01', NOW)>
+        token (unique): <password()>
+        proprietaire: <lastName()>
+        valeurInitiale: <randomDigit()>
+        categorie: '@categorie_<numberBetween(1, 6)>'

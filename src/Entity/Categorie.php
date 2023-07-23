@@ -7,9 +7,25 @@ use App\Repository\CategorieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CategorieRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['categorie:list']
+            ]
+        ],
+    ],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['categorie:item']
+            ]
+        ],
+    ],
+)]
 class Categorie
 {
     #[ORM\Id]
@@ -18,9 +34,11 @@ class Categorie
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[groups(['categorie:list', 'categorie:item', 'nft:list','nft:post','nft:item','nft:put'])]
     private ?string $libelle = null;
 
     #[ORM\Column(length: 255)]
+    #[groups(['categorie:list', 'categorie:item', 'nft:list','nft:post','nft:item','nft:put'])]
     private ?string $designation = null;
 
     #[ORM\OneToMany(mappedBy: 'categorie', targetEntity: Nft::class)]

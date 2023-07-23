@@ -8,49 +8,90 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NftRepository::class)]
-#[ApiResource()]
+#[ApiResource(
+    collectionOperations: [
+    'get' => [
+        'normalization_context' => [
+            'groups' => ['nft:list']
+        ]
+    ],
+    'post' => [
+        'denormalization_context' => [
+            'groups' => ['nft:post']
+        ]
+    ],
+],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['nft:item']
+            ]
+        ],
+        'put' => [
+            'denormalization_context' => [
+                'groups' => ['nft:put']
+            ]
+        ],
+        'delete' => [
+            'access_control' => 'is_granted(\'DELETE\', object)',
+        ],
+    ],
+)]
 class Nft
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['nft:list','nft:post','nft:item','nft:put'])]
     private ?string $nom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['nft:list','nft:post','nft:item','nft:put'])]
     private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['nft:list','nft:post','nft:item'])]
     private ?string $token = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['nft:list','nft:post','nft:item','nft:put'])]
     private ?\DateTimeInterface $dateVente = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['nft:list','nft:post','nft:item'])]
     private ?string $proprietaire = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Groups(['nft:list','nft:post','nft:item'])]
     private ?string $valeurInitiale = null;
 
     #[ORM\ManyToOne(inversedBy: 'nfts')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?categorie $categorie = null;
+    #[Groups(['nft:list','nft:post','nft:item','nft:put'])]
+    private ?Categorie $categorie = null;
 
-    #[ORM\OneToMany(mappedBy: 'nft', targetEntity: historique::class)]
+    #[ORM\OneToMany(mappedBy: 'nft', targetEntity: Historique::class)]
+    #[Groups(['nft:list','nft:item'])]
     private Collection $historiques;
 
-    #[ORM\OneToMany(mappedBy: 'nft', targetEntity: acquisition::class)]
+    #[ORM\OneToMany(mappedBy: 'nft', targetEntity: Acquisition::class)]
+    #[Groups( 'nft:item')]
     private Collection $acquisitions;
 
     #[ORM\OneToMany(mappedBy: 'nft', targetEntity: Visite::class)]
+    #[Groups('nft:item')]
     private Collection $Visites;
 
     #[ORM\ManyToOne(inversedBy: 'nfts')]
-    private ?groupe $groupe = null;
+    #[Groups(['nft:list', 'nft:item','nft:put'])]
+    private ?Groupe $groupe = null;
 
     public function __construct()
     {
@@ -105,7 +146,7 @@ class Nft
         return $this->dateVente;
     }
 
-    public function setDateVente(\DateTimeInterface $dateVente): static
+    public function setDateVente(?\DateTimeInterface $dateVente): static
     {
         $this->dateVente = $dateVente;
 
@@ -141,7 +182,7 @@ class Nft
         return $this->categorie;
     }
 
-    public function setCategorie(?categorie $categorie): static
+    public function setCategorie(?Categorie $categorie): static
     {
         $this->categorie = $categorie;
 
@@ -156,7 +197,7 @@ class Nft
         return $this->historiques;
     }
 
-    public function addHistorique(historique $historique): static
+    public function addHistorique(Historique $historique): static
     {
         if (!$this->historiques->contains($historique)) {
             $this->historiques->add($historique);
@@ -166,7 +207,7 @@ class Nft
         return $this;
     }
 
-    public function removeHistorique(historique $historique): static
+    public function removeHistorique(Historique $historique): static
     {
         if ($this->historiques->removeElement($historique)) {
             // set the owning side to null (unless already changed)
@@ -187,7 +228,7 @@ class Nft
         return $this->acquisitions;
     }
 
-    public function addAcquisition(acquisition $acquisition): static
+    public function addAcquisition(Acquisition $acquisition): static
     {
         if (!$this->acquisitions->contains($acquisition)) {
             $this->acquisitions->add($acquisition);
@@ -197,7 +238,7 @@ class Nft
         return $this;
     }
 
-    public function removeAcquisition(acquisition $acquisition): static
+    public function removeAcquisition(Acquisition $acquisition): static
     {
         if ($this->acquisitions->removeElement($acquisition)) {
             // set the owning side to null (unless already changed)
@@ -239,12 +280,12 @@ class Nft
         return $this;
     }
 
-    public function getGroupe(): ?groupe
+    public function getGroupe(): ?Groupe
     {
         return $this->groupe;
     }
 
-    public function setGroupe(?groupe $groupe): static
+    public function setGroupe(?Groupe $groupe): static
     {
         $this->groupe = $groupe;
 

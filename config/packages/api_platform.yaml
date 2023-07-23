@@ -7,5 +7,5 @@ api_platform:
         versions: [3]
         api_keys:
             JWT:
-                name: Authorization
-                type: header
+                name: "Authorization"
+                type: "header"

@@ -6,9 +6,30 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\VisiteRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: VisiteRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    collectionOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['visite:list']
+            ]
+        ],
+        'post' => [
+            'denormalization_context' => [
+                'groups' => ['visite:post']
+            ]
+        ],
+    ],
+    itemOperations: [
+        'get' => [
+            'normalization_context' => [
+                'groups' => ['visite:item']
+            ]
+        ],
+    ],
+)]
 class Visite
 {
     #[ORM\Id]
@@ -17,6 +38,7 @@ class Visite
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['user:item','visite:list','visite:post','visite:item','nft:item'])]
     private ?\DateTimeInterface $dateVisite = null;
 
     #[ORM\ManyToOne(inversedBy: 'visites')]
